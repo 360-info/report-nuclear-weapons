@@ -1,0 +1,162 @@
+---
+title: "Nuclear weapons"
+author: "James Goldie, 360info"
+---
+
+```{r setup}
+library(tidyverse)
+library(glue)
+library(sf)
+library(ggsflabel)
+library(gganimate)
+library(themes360info)
+library(rnaturalearth)
+library(here)
+```
+
+```{r import}
+stockpiles <- read_csv(here("data", "nuclear-warhead-stockpiles.csv"))
+stockpiles
+```
+
+The OWID data is already really tidy - no need to do much with the country names, and ISO3 codes are already provided. (There are also relatively few nuclear powers.)
+
+The current nuclear powers are `r stockpiles %>% filter(Year == max(Year, na.rm = TRUE)) %>% pull(Entity) %>% unique() %>% glue_collapse(sep = ", ", last = " and ")`.
+
+Let's get our world map boundaries:
+
+```{r boundaries}
+sf::sf_use_s2(FALSE)
+
+ne_countries(returnclass = "sf") %>%
+# geoboundaries() %>%
+  select(Code = iso_a3) -># %>%
+  # st_make_valid() ->
+boundaries
+
+sf::sf_use_s2(TRUE)
+
+# get the centroids of the nuclear powers
+boundaries %>%
+  filter(Code %in% unique(stockpiles$Code)) %>%
+  st_make_valid() %>%
+  st_centroid(of_largest_polygon = TRUE) ->
+centroids
+
+# now simplify the geometry for plotting
+# boundaries %>%
+#   st_simplify(dTolerance = 1) ->
+# simple_boundaries
+```
+
+Finally, we need to join the nuclear data with the centroids:
+
+```{r joinnuclear}
+centroids %>%
+  right_join(stockpiles, by = "Code") %>%
+  filter(nuclear_weapons_stockpile > 0) ->
+stockpile_points
+
+# finally, let's split based on large and small stockpiles so that we can tweak
+# the label appearance
+```
+
+Okay, let's plot:
+
+```{r map}
+
+si_count <- scales::label_number_si()
+comma_count <- scales::label_comma(accuracy = 1)
+
+warheads_map <- function(df, year) {
+  warhead_plot <- ggplot(df) +
+    # world map boundaries
+    geom_sf(data = boundaries, fill = "#cccccc", colour = NA) +
+    # points and labels
+    geom_sf(aes(size = Count, alpha = Count), colour = "orange") +
+    # labels: uk and france overlaps are handled manually to avoid jumping around (this would be way easier if gganimate was working)
+    geom_sf_text(
+      aes(label = pt_label),
+      data = df %>% filter(Entity %in% c("United Kingdom")),
+      family = "Body 360info", fontface = "bold",
+      size = 3, direction = "both",
+      # check_overlap = TRUE,
+      hjust = "right", nudge_x = -2.5,
+      colour = "black", show.legend = FALSE) +
+    geom_sf_text(
+      aes(label = pt_label),
+      data = df %>% filter(Entity %in% c("France")),
+      family = "Body 360info", fontface = "bold",
+      size = 3, direction = "both",
+      hjust = "left", nudge_x = 2.5,
+      colour = "black", show.legend = FALSE) +
+    # everyone else
+    geom_sf_text(
+      aes(label = pt_label),
+      data = df %>% filter(!(Entity %in% c("United Kingdom", "France"))),
+      family = "Body 360info", fontface = "bold",
+      size = 3,
+      # check_overlap = TRUE,
+      # hjust = 0, nudge_x = 0.5,
+      colour = "black", show.legend = FALSE) +
+    # geom_text_repel(
+    #   aes(x, y, label = pt_label),
+    #   family = "Body 360info", fontface = "bold",
+    #   size = 3, show.legend = FALSE, max.overlaps = 100,
+    # ) +
+    scale_alpha(
+      limits =
+        c(1, max(stockpile_points$nuclear_weapons_stockpile, na.rm = TRUE)),
+      range = c(1, 0.35), guide = NULL) +
+    scale_radius(name = "Num. warheads",
+      limits = c(1,
+        max(stockpile_points$nuclear_weapons_stockpile, na.rm = TRUE)),
+      range = c(1, 80), labels = si_count, guide = NULL) +
+    coord_sf(crs = "+proj=eck4", clip = "off") +
+    theme_360() +
+    theme(
+      # panel.background = "white",
+      plot.background = element_rect(fill = "white"),
+      # panel.grid = element_blank(),
+      legend.direction = "horizontal",
+      legend.position = "top"
+    ) +
+    labs(
+      x = NULL, y = NULL,
+      title = paste("WARHEADS IN", year),
+      subtitle = "A SUBTITLE HERE",
+      caption = paste(
+        "**CHART:** James Goldie, 360info",
+        "**DATA:** Our World In Data [ourworldindata.org/nuclear-weapons]",
+        sep = "<br>"
+      )
+    )
+
+  save_360plot(warhead_plot, here("out", paste0("warheads-", year, ".png")),
+    shape = "sdtv-landscape")
+  return(warhead_plot)
+}
+
+# get the geometry coordinates
+coordinates <- st_coordinates(stockpile_points)
+
+stockpile_points %>%
+  rename(Count = nuclear_weapons_stockpile) %>%
+  mutate(
+    x = coordinates[, 1],
+    y = coordinates[, 2],
+    pt_label = paste0(Entity, "\n", si_count(Count))) %>%
+  # filter(Year == 1987) %>%
+  split(.$Year) %>%
+  iwalk(warheads_map)
+```
+
+We can manually stitch this together in a video with `ffmpeg`:
+
+```{r videoout}
+system2("ffmpeg", c(
+  "-framerate", "3",
+  "-pattern_type", "glob", "-i", "'warheads-*.png'",
+  "-c:v", "libx264", "-pix_fmt", "yuv420p",
+  "warheads.mp4"))
+```
