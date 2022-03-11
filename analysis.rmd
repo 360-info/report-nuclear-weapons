@@ -9,6 +9,7 @@ library(glue)
 library(sf)
 library(ggsflabel)
 library(gganimate)
+library(ggtext)
 library(themes360info)
 library(rnaturalearth)
 library(here)
@@ -79,16 +80,16 @@ warheads_map <- function(df, year) {
       aes(label = pt_label),
       data = df %>% filter(Entity %in% c("United Kingdom")),
       family = "Body 360info", fontface = "bold",
-      size = 3, direction = "both",
+      size = 3,
       # check_overlap = TRUE,
-      hjust = "right", nudge_x = -2.5,
+      hjust = "right", nudge_x = -12.5,
       colour = "black", show.legend = FALSE) +
     geom_sf_text(
       aes(label = pt_label),
       data = df %>% filter(Entity %in% c("France")),
       family = "Body 360info", fontface = "bold",
-      size = 3, direction = "both",
-      hjust = "left", nudge_x = 2.5,
+      size = 3,
+      hjust = "left", nudge_x = 12.5,
       colour = "black", show.legend = FALSE) +
     # everyone else
     geom_sf_text(
@@ -99,11 +100,6 @@ warheads_map <- function(df, year) {
       # check_overlap = TRUE,
       # hjust = 0, nudge_x = 0.5,
       colour = "black", show.legend = FALSE) +
-    # geom_text_repel(
-    #   aes(x, y, label = pt_label),
-    #   family = "Body 360info", fontface = "bold",
-    #   size = 3, show.legend = FALSE, max.overlaps = 100,
-    # ) +
     scale_alpha(
       limits =
         c(1, max(stockpile_points$nuclear_weapons_stockpile, na.rm = TRUE)),
@@ -115,40 +111,44 @@ warheads_map <- function(df, year) {
     coord_sf(crs = "+proj=eck4", clip = "off") +
     theme_360() +
     theme(
-      # panel.background = "white",
       plot.background = element_rect(fill = "white"),
-      # panel.grid = element_blank(),
       legend.direction = "horizontal",
-      legend.position = "top"
+      legend.position = "top",
+      plot.title = element_markdown(
+        colour = colours_360("lightblue"),
+        family = "Headline 360info",
+        size = rel(1.8),
+        margin = margin(b = 16 * 0.5))
     ) +
     labs(
       x = NULL, y = NULL,
-      title = paste("WARHEADS IN", year),
-      subtitle = "A SUBTITLE HERE",
+      title = paste0(
+        toupper("Estimated nuclear stockpiles in "),
+        "<span style='color:black'>",
+        year, "</span>"),
       caption = paste(
-        "**CHART:** James Goldie, 360info",
+        "**CHART:** James Goldie & Reece Hooker, 360info",
         "**DATA:** Our World In Data [ourworldindata.org/nuclear-weapons]",
-        sep = "<br>"
-      )
-    )
+        sep = "<br>"))
 
   save_360plot(warhead_plot, here("out", paste0("warheads-", year, ".png")),
-    shape = "sdtv-landscape")
+    shape = "sdtv-landscape", retina = 4)
   return(warhead_plot)
 }
 
 # get the geometry coordinates
 coordinates <- st_coordinates(stockpile_points)
 
+# render each frame off
 stockpile_points %>%
   rename(Count = nuclear_weapons_stockpile) %>%
   mutate(
     x = coordinates[, 1],
     y = coordinates[, 2],
-    pt_label = paste0(Entity, "\n", si_count(Count))) %>%
-  # filter(Year == 1987) %>%
+    pt_label = paste0(Entity, "\n",
+      if_else(Count >= 100, si_count(Count), as.character(Count)))) %>%
   split(.$Year) %>%
-  iwalk(warheads_map)
+  imap(warheads_map) -> test
 ```
 
 We can manually stitch this together in a video with `ffmpeg`:
