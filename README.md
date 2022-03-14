@@ -1,6 +1,6 @@
 # 360info report template
 
-What's this report all about? What kind of charts or analysis have we done?
+This analysis visualises the estimated size of countries' nuclear arsenals from 1945 until the present day.
 
 ## Use + Remix
 
@@ -8,17 +8,13 @@ What's this report all about? What kind of charts or analysis have we done?
 
 These charts, as well as the analyses that underpin them, are available under a Creative Commons Attribution 4.0 licence. This includes commercial reuse and derivates.
 
-<!-- Do any of the data sources fall under a different licence? If so, describe the licence and which parts of the data fall under it here! if most of it does, change the above and replace LICENCE.md too -->
-
 Data in these charts comes from:
 
-* Data sources here (with links!)
+* [Our World in Data](https://ourworldindata.org/nuclear-weapons)
 
 **Please attribute 360info and the data sources when you use and remix these visualisations.**
 
 ### Reproduce the analysis
-
-<!-- These instructions are for analysis and charts done in R. If you've used something else, replace this section. -->
 
 Our analyses are done in [R](http://r-project.org) and can be found in the `*.r` and `*.rmd` files.
 
@@ -28,4 +24,4 @@ The `renv.lock` file can be used with the [`renv`](https://rstudio.github.io/ren
 
 <!-- replace `report-template` with the name of this repo in the link below  -->
 
-If you find any problems with our analysis or charts, please feel free to [create an issue](https://github.com/360-info/report-template/issues/new)!
+If you find any problems with our analysis or charts, please feel free to [create an issue](https://github.com/360-info/report-nuclear-weapons/issues/new)!
