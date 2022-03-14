@@ -1,4 +1,4 @@
-# 360info report template
+# Nuclear weapons
 
 This analysis visualises the estimated size of countries' nuclear arsenals from 1945 until the present day.
 
