@@ -14,11 +14,17 @@ Data in these charts comes from:
 
 **Please attribute 360info and the data sources when you use and remix these visualisations.**
 
+The music in this video is [Piano Moment by bensound.com](https://www.bensound.com/royalty-free-music/track/piano-moment). Please credit them if you use the music.
+
 ### Reproduce the analysis
 
 Our analyses are done in [R](http://r-project.org) and can be found in the `*.r` and `*.rmd` files.
 
 The `renv.lock` file can be used with the [`renv`](https://rstudio.github.io/renv) or [`capsule`](https://github.com/MilesMcBain/capsule) packages to recreate the R package dependencies.
+
+### Video files
+
+Finishing work on this visualisation was done in Adobe Premiere Pro. Project files are available [here](https://drive.google.com/drive/folders/1qqMqLeDuNU9oCjQ0UPyV9ppSvqV-wGd3?usp=sharing).
 
 ## Help
 
