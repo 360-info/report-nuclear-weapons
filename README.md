@@ -14,6 +14,8 @@ Data in these charts comes from:
 
 **Please attribute 360info and the data sources when you use and remix these visualisations.**
 
+The music in this video is [Piano Moment by bensound.com](https://www.bensound.com/royalty-free-music/track/piano-moment). Please credit them if you use the music.
+
 ### Reproduce the analysis
 
 Our analyses are done in [R](http://r-project.org) and can be found in the `*.r` and `*.rmd` files.
