@@ -11,6 +11,7 @@ Thumbs.db
 # web dev
 /node_modules
 
+# generated results
 out
 
 # downloaded shapefiles

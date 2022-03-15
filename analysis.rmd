@@ -66,6 +66,9 @@ Okay, let's plot:
 
 ```{r map}
 
+dir.create(here("out", "png"), showWarnings = FALSE)
+dir.create(here("out", "svg"), showWarnings = FALSE)
+
 si_count <- scales::label_number_si()
 comma_count <- scales::label_comma(accuracy = 1)
 
@@ -131,8 +134,14 @@ warheads_map <- function(df, year) {
         "**DATA:** Our World In Data [ourworldindata.org/nuclear-weapons]",
         sep = "<br>"))
 
-  save_360plot(warhead_plot, here("out", paste0("warheads-", year, ".png")),
+  register_360fonts("itc")
+  save_360plot(warhead_plot,
+    here("out", "png", paste0("warheads-", year, ".png")),
     shape = "sdtv-landscape", retina = 4)
+  register_360fonts("libre")
+  save_360plot(warhead_plot,
+    here("out", "svg", paste0("warheads-", year, ".svg")),
+    shape = "sdtv-landscape")
   return(warhead_plot)
 }
 
