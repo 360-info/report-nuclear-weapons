@@ -2,6 +2,8 @@
 
 This analysis visualises the estimated size of countries' nuclear arsenals from 1945 until the present day.
 
+![Estimated size of countries' nuclear arsenals in 1968](https://github.com/360-info/report-nuclear-weapons/raw/main/out/png/warheads-1968.png)
+
 ## Use + Remix
 
 ![[Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0)](https://mirrors.creativecommons.org/presskit/buttons/80x15/png/by.png)
